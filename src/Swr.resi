@@ -1,5 +1,5 @@
 module Options: {
-  type t = SwrOptions.t = {
+  type t = Swr_Options.t = {
     errorRetryInterval: option<int>,
     errorRetryCount: option<int>,
     loadingTimeout: option<int>,
@@ -36,19 +36,19 @@ module Options: {
 
   let to_configInterface: (
     ~initialData: 'a=?,
-    ~onLoadingSlow: ('b, SwrRaw.configInterface<'b, 'a>) => unit=?,
-    ~onSuccess: ('a, 'b, SwrRaw.configInterface<'b, 'a>) => unit=?,
-    ~onError: (Js.Promise.error, 'b, SwrRaw.configInterface<'b, 'a>) => unit=?,
+    ~onLoadingSlow: ('b, Swr_Raw.configInterface<'b, 'a>) => unit=?,
+    ~onSuccess: ('a, 'b, Swr_Raw.configInterface<'b, 'a>) => unit=?,
+    ~onError: (Js.Promise.error, 'b, Swr_Raw.configInterface<'b, 'a>) => unit=?,
     ~onErrorRetry: (
       Js.Promise.error,
       'b,
-      SwrRaw.configInterface<'b, 'a>,
-      SwrRaw.revalidateType,
-      SwrRaw.revalidateOptionInterface,
+      Swr_Raw.configInterface<'b, 'a>,
+      Swr_Raw.revalidateType,
+      Swr_Raw.revalidateOptionInterface,
     ) => unit=?,
     ~compare: (option<'a>, option<'a>) => bool=?,
     t,
-  ) => SwrRaw.configInterface<'b, 'a>
+  ) => Swr_Raw.configInterface<'b, 'a>
 }
 
 type bound_mutate<'data> = (

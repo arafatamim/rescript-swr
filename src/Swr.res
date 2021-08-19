@@ -1,5 +1,5 @@
-module Options = SwrOptions
-module Raw = SwrRaw
+module Options = Swr_Options
+module Raw = Swr_Raw
 
 type bound_mutate<'data> = (
   ~data: 'data=?,

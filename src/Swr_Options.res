@@ -70,7 +70,7 @@ let to_configInterface = (
     suspense,
   },
 ) =>
-  SwrRaw.configInterface(
+  Swr_Raw.configInterface(
     ~errorRetryInterval?,
     ~errorRetryCount?,
     ~loadingTimeout?,

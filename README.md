@@ -1,20 +1,20 @@
-# bs-swr
-BuckleScript bindings to [SWR](https://github.com/zeit/swr).
+# rescript-swr
+ReScript bindings to [SWR](https://github.com/vercel/swr).
 
 ## Installation
-Add
+Run
 ```
-"@roddynpm/bs-swr": "^0.2.5",
-"swr": "^0.2.0",
+npm install rescript-swr swr
 ```
-as dependencies to `package.json` and `@roddynpm/bs-swr` to `bsconfig.json`.
+and add `rescript-swr` to `bsconfig.json`.
 
 ## Example
-```reason
-[@react.component]
+```rescript
+@react.component
 let make = () => {
   let config = Swr.Options.make(~dedupingInterval=6000, ());
-  let Swr.{data} = Swr.useSWR(~config, "key", _ => load_data());
+
+  let {data} = Swr.useSWR(~config, "key", _ => load_data());
 
   switch (data) {
   | Some(data) => render(data)
@@ -22,3 +22,6 @@ let make = () => {
   };
 };
 ```
+
+## Credits
+Originally forked from https://github.com/roddyyaga/bs-swr

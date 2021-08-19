@@ -1,12 +1,12 @@
 {
-  "name": "@roddynpm/bs-swr",
-  "version": "0.1.0",
+  "name": "rescript-swr",
+  "version": "0.0.1",
   "sources": {
     "dir" : "src",
     "subdirs" : true
   },
   "package-specs": {
-    "module": "commonjs",
+    "module": "es6",
     "in-source": true
   },
   "suffix": ".bs.js",
@@ -16,6 +16,5 @@
   "warnings": {
     "error" : "+101"
   },
-  "namespace": false,
-  "refmt": 3
+  "namespace": false
 }

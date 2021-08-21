@@ -32,6 +32,9 @@ let wrap_raw_response_intf = x =>
 let useSWR = (
   ~config=?,
   ~initialData=?,
+  ~isOnline=?,
+  ~isPaused=?,
+  ~isVisible=?,
   ~onLoadingSlow=?,
   ~onSuccess=?,
   ~onError=?,
@@ -46,6 +49,9 @@ let useSWR = (
     let raw_config = Options.to_configInterface(
       config,
       ~initialData?,
+      ~isOnline?,
+      ~isPaused?,
+      ~isVisible?,
       ~onLoadingSlow?,
       ~onSuccess?,
       ~onError?,
@@ -65,6 +71,9 @@ module SwrConfig = {
   @react.component
   let make = (
     ~initialData=?,
+    ~isOnline=?,
+    ~isPaused=?,
+    ~isVisible=?,
     ~onLoadingSlow=?,
     ~onSuccess=?,
     ~onError=?,
@@ -76,6 +85,9 @@ module SwrConfig = {
     <Swr_Raw.SwrConfigRaw
       value={Swr_Options.to_configInterface(
         ~initialData?,
+        ~isOnline?,
+        ~isPaused?,
+        ~isVisible?,
         ~onLoadingSlow?,
         ~onSuccess?,
         ~onError?,

@@ -1,5 +1,6 @@
 {
   "name": "rescript-swr",
+  "description": "SWR bindings for ReScript",
   "version": "0.1.0",
   "repository": {
     "type": "git",

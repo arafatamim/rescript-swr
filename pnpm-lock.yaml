@@ -1,16 +1,25 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@rescript/react': ^0.10.3
   rescript: ^9.1.4
-  swr: '>=0.2.1'
+  swr: '>=0.5.6'
 
 dependencies:
+  '@rescript/react': 0.10.3
   swr: 0.5.6
 
 devDependencies:
   rescript: 9.1.4
 
 packages:
+
+  /@rescript/react/0.10.3:
+    resolution: {integrity: sha512-Lf9rzrR3bQPKJjOK3PBRa/B3xrJ7CqQ1HYr9VHPVxJidarIJJFZBhj0Dg1uZURX+Wg/xiP0PHFxXmdj2bK8Vxw==}
+    peerDependencies:
+      react: '>=16.8.1'
+      react-dom: '>=16.8.1'
+    dev: false
 
   /dequal/2.0.2:
     resolution: {integrity: sha512-q9K8BlJVxK7hQYqa6XISGmBZbtQQWVXSrRrWreHC94rMt1QL/Impruc+7p2CYSYuVIUr+YCt6hjrs1kkdJRTug==}

@@ -91,3 +91,9 @@ external mutate2_one_item_array_fetcher: (
 
 @val @module("swr")
 external mutate2_shouldRevalidate: ('key, bool) => Js.Promise.t<option<'data>> = "mutate"
+
+module SwrConfigRaw = {
+  @module("swr") @react.component
+  external make: (~value: configInterface<'key, 'data>, ~children: React.element) => React.element =
+    "SWRConfig"
+}

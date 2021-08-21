@@ -29,18 +29,60 @@ let wrap_raw_response_intf = x =>
     }
   }
 
-let useSWR = (~config=?, x, f) =>
+let useSWR = (
+  ~config=?,
+  ~initialData=?,
+  ~onLoadingSlow=?,
+  ~onSuccess=?,
+  ~onError=?,
+  ~onErrorRetry=?,
+  ~compare=?,
+  x,
+  f,
+) =>
   switch config {
-  | None => Raw.useSWR1([x], f) |> wrap_raw_response_intf
+  | None => Raw.useSWR1([x], f)->wrap_raw_response_intf
   | Some(config) =>
-    let raw_config = Options.to_configInterface(config)
-    Raw.useSWR1_config([x], f, raw_config) |> wrap_raw_response_intf
+    let raw_config = Options.to_configInterface(
+      config,
+      ~initialData?,
+      ~onLoadingSlow?,
+      ~onSuccess?,
+      ~onError?,
+      ~onErrorRetry?,
+      ~compare?,
+    )
+    Raw.useSWR1_config([x], f, raw_config)->wrap_raw_response_intf
   }
-
-let useSWR_string = (x, f) => Raw.useSWR_string(x, f) |> wrap_raw_response_intf
 
 let mutate = (~f=?, key) =>
   switch f {
   | Some(f) => Raw.mutate2_one_item_array_fetcher([key], f)
   | None => Raw.mutate1_one_item_array([key])
   }
+
+module SwrConfig = {
+  @react.component
+  let make = (
+    ~initialData=?,
+    ~onLoadingSlow=?,
+    ~onSuccess=?,
+    ~onError=?,
+    ~onErrorRetry=?,
+    ~compare=?,
+    ~config: Swr_Options.t,
+    ~children: React.element,
+  ) =>
+    <Swr_Raw.SwrConfigRaw
+      value={Swr_Options.to_configInterface(
+        ~initialData?,
+        ~onLoadingSlow?,
+        ~onSuccess?,
+        ~onError?,
+        ~onErrorRetry?,
+        ~compare?,
+        config,
+      )}>
+      {children}
+    </Swr_Raw.SwrConfigRaw>
+}

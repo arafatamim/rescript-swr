@@ -1,23 +1,23 @@
 {
   "name": "rescript-swr",
   "description": "SWR bindings for ReScript",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/runnerbangladesh/rescript-swr.git"
   },
   "scripts": {
-    "prepare": "rescript clean -with-deps && rescript",
+    "prepare": "rescript clean -with-deps && rescript build",
     "build": "rescript build",
     "start": "rescript build -w",
     "clean": "rescript clean"
   },
   "keywords": [
-    "BuckleScript",
-    "ReasonML",
-    "OCaml",
-    "ReScript",
-    "SWR"
+    "bucklescript",
+    "reasonml",
+    "rescript",
+    "react",
+    "swr"
   ],
   "license": "MIT",
   "bugs": {

@@ -71,6 +71,16 @@ type rec swrConfiguration<'key, 'data, 'error> = {
 }
 
 @val @module("swr")
+external useSWR: ('arg, fetcher1<'arg, 'data>) => swrResponse<'data, 'error> = "default"
+
+@val @module("swr")
+external useSWR_config: (
+  'arg,
+  fetcher1<'arg, 'data>,
+  swrConfiguration<'arg, 'data, 'error>,
+) => swrResponse<'data, 'error> = "default"
+
+@val @module("swr")
 external useSWR_string: (string, fetcher1<string, 'data>) => swrResponse<'data, 'error> = "default"
 
 @val @module("swr")

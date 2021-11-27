@@ -137,14 +137,14 @@ type fetcher2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => Js.Promise.t<'data>
 
 ### `Swr.useSWR`
 ```rescript
-useSWR_string: (
-  string,
-  fetcher1<string, 'data>,
+useSWR: (
+  'key,
+  fetcher1<'key, 'data>,
 ) => responseInterface<'data, 'error>
 
-useSWR_string_config: (
-  string,
-  fetcher1<string, 'data>,
+useSWR_config: (
+  'key,
+  fetcher1<'key, 'data>,
   swrConfiguration<string, 'data, 'error>,
 ) => responseInterface<'data, 'error>
 

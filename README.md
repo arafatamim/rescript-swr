@@ -1,27 +1,49 @@
 # rescript-swr
-ReScript bindings to [SWR](https://github.com/vercel/swr).
+Nearly low-cost ReScript bindings to [SWR](https://github.com/vercel/swr).
+Supports version ^1.0.0.
 
 ## Installation
 Run
 ```
 npm install rescript-swr swr
 ```
-and add `rescript-swr` to `bsconfig.json`.
+then update the `bs-dependencies` key in your `bsconfig.json` file to include "`rescript-swr`".
 
-## Example
+## Examples
 ```rescript
 @react.component
 let make = () => {
-  let config = Swr.Options.make(~dedupingInterval=6000, ());
+  let config = Swr.swrConfiguration(
+    ~refreshInterval=10000,
+    ~loadingTimeout=3000,
+    ~fallbackData={cats: 0, dogs: 0, hamsters: 0},
+    ~onLoadingSlow=(_, _) => {
+      Js.log("This is taking too long")
+    },
+    ~onErrorRetry=(_error, _key, _config, revalidate, {retryCount}) => {
+      // Retry after 5 seconds.
+      Js.Global.setTimeout(
+        () => revalidate(. {retryCount: retryCount, dedupe: None})->ignore,
+        5000,
+      )->ignore
+    },
+    ~use=[
+      // logger middleware
+      (useSWRNext, . key, fetcher, config) => {
+        let extendedFetcher = args => {
+          Js.log2("SWR Request: ", key)
+          fetcher(args)
+        }
+        useSWRNext(. key, extendedFetcher, config)
+      },
+    ],
+    (),
+  ),
 
-  let {data} = Swr.useSWR(
-    key,
-    (key) => fetchData(key),
-    // callback functions are passed as separate
-    // parameters instead of in the
-    // config parameter
-    ~onLoadingSlow=(_, _) => setLoadingSlow(_ => true),
-    ~config=config
+  let {data, error} = Swr.useSWR_string_config(
+    "/api/user1/pets",
+    fetcher,
+    config
   );
 
   switch (data) {
@@ -30,73 +52,104 @@ let make = () => {
   };
 };
 ```
-### Global configuration
+### Provide global configuration
 ```rescript
-<Swr.SwrConfig
-  initialData={someData}
-  config={Swr.Options.make(
-    ~shouldRetryOnError=true,
-    ~errorRetryCount=2,
-    ~loadingTimeout=3000,
+<Swr.SwrConfigProvider
+  value={Swr.swrConfiguration(
+    ~fallback=Swr.makeFallback({
+      "/api/user1/pets": {
+        "dogs": 2,
+        "cats": 3,
+        "hamsters": 1,
+      },
+      "/api/user2/pets": {
+        "dogs": 1,
+        "cats": 2,
+        "hamsters": 0,
+      },
+    }),
     (),
-  )}
-  <Child />
-</Swr.SwrConfig>
+  )}>
+  <children />
+</Swr.SwrConfigProvider>
+```
+### Obtain global configuration
+```rescript
+open Swr
+
+// return all global configurations
+let globalConfig: SwrConfiguration.useSWRConfig()
+// access configuration property using auto-generated getter
+let refreshInterval = globalConfig->Swr.refreshIntervalGet
+Js.log(refreshInterval)
+
+// broadcast a revalidation message globally to other SWR hooks
+globalConfig->SwrConfiguration.mutate_key("/api/user1/pets")
+
+// update the local data immediately, but disable the revalidation
+globalConfig->SwrConfiguration.mutate("/api/user1/pets", {dogs: 2, hamsters: 5, cats: 10}, false)
 ```
 
 ## API
-### `Swr.Options.t`
+### `Swr.swrConfiguration<'key, 'data, 'error>`
 ```rescript
-errorRetryInterval: option<int>,
-errorRetryCount: option<int>,
-loadingTimeout: option<int>,
-focusThrottleInterval: option<int>,
-dedupingInterval: option<int>,
-refreshInterval: option<int>,
-refreshWhenHidden: option<bool>,
-refreshWhenOffline: option<bool>,
-revalidateOnFocus: option<bool>,
-revalidateOnMount: option<bool>,
-revalidateOnReconnect: option<bool>,
-revalidateWhenStale: option<bool>,
-shouldRetryOnError: option<bool>,
-suspense: option<bool>,
+@optional dedupingInterval: int,
+@optional errorRetryInterval: int,
+@optional errorRetryCount: int,
+@optional fallbackData: 'data,
+@optional fallback: Js.Json.t,
+@optional fetcher: fetcher<'key, 'data>,
+@optional focusThrottleInterval: int,
+@optional loadingTimeout: int,
+@optional refreshInterval: int,
+@optional refreshWhenHidden: bool,
+@optional refreshWhenOffline: bool,
+@optional revalidateOnFocus: bool,
+@optional revalidateOnMount: bool,
+@optional revalidateOnReconnect: bool,
+@optional revalidateIfStale: bool,
+@optional shouldRetryOnError: bool,
+@optional suspense: bool,
+@optional use: array<middleware<'key, 'data, 'error, swrConfiguration<'key, 'data, 'error>>>,
+@optional isPaused: unit => bool,
+@optional isOnline: unit => bool,
+@optional isVisible: unit => bool,
+@optional onDiscarded: string => unit,
+@optional onLoadingSlow: (string, swrConfiguration<'key, 'data, 'error>) => unit,
+@optional onSuccess: ('data, string, swrConfiguration<'key, 'data, 'error>) => unit,
+@optional onError: ('error, string, swrConfiguration<'key, 'data, 'error>) => unit,
+@optional
+onErrorRetry: (
+  'error,
+  string,
+  swrConfiguration<'key, 'data, 'error>,
+  revalidateType,
+  revalidatorOptions,
+) => unit,
+@optional compare: (option<'data>, option<'data>) => bool,
 ```
 
-### `Swr.useSwr`
+### `Swr.fetcher`
 ```rescript
-(
-  ~config: Swr.Options.t=?,
-  ~initialData: 'data=?,
-  ~isOnline: unit => bool=?,
-  ~isPaused: unit => bool=?,
-  ~isVisible: unit => bool=?,
-  ~onLoadingSlow: (
-    array<'key>,
-    Swr_Raw.configInterface<array<'key>, 'data>,
-  ) => unit=?,
-  ~onSuccess: (
-    'data,
-    array<'key>,
-    Swr_Raw.configInterface<array<'key>, 'data>,
-  ) => unit=?,
-  ~onError: (
-    Js.Promise.error,
-    array<'key>,
-    Swr_Raw.configInterface<array<'key>, 'data>,
-  ) => unit=?,
-  ~onErrorRetry: (
-    Js.Promise.error,
-    array<'key>,
-    Swr_Raw.configInterface<array<'key>, 'data>,
-    Swr_Raw.revalidateType,
-    Swr_Raw.revalidateOptionInterface,
-  ) => unit=?,
-  ~compare: (option<'data>, option<'data>) => bool=?,
-  'key,
-  'key => Js.Promise.t<'data>,
-) => responseInterface<'data>
+type fetcher1<'arg, 'data> = 'arg => Js.Promise.t<'data>
+type fetcher2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => Js.Promise.t<'data>
+```
 
+### `Swr.useSWR`
+```rescript
+useSWR_string: (
+  string,
+  fetcher1<string, 'data>,
+) => responseInterface<'data, 'error>
+
+useSWR_string_config: (
+  string,
+  fetcher1<string, 'data>,
+  swrConfiguration<string, 'data, 'error>,
+) => responseInterface<'data, 'error>
+
+// Look into the source code for more overloads,
+// or create them yourself as required
 ```
 
 ## Credits

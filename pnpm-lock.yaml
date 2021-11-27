@@ -3,11 +3,11 @@ lockfileVersion: 5.3
 specifiers:
   '@rescript/react': ^0.10.3
   rescript: ^9.1.4
-  swr: '>=0.5.6'
+  swr: ^1.0.0
 
 dependencies:
   '@rescript/react': 0.10.3
-  swr: 0.5.6
+  swr: 1.0.1
 
 devDependencies:
   rescript: 9.1.4
@@ -32,8 +32,8 @@ packages:
     requiresBuild: true
     dev: true
 
-  /swr/0.5.6:
-    resolution: {integrity: sha512-Bmx3L4geMZjYT5S2Z6EE6/5Cx6v1Ka0LhqZKq8d6WL2eu9y6gHWz3dUzfIK/ymZVHVfwT/EweFXiYGgfifei3w==}
+  /swr/1.0.1:
+    resolution: {integrity: sha512-EPQAxSjoD4IaM49rpRHK0q+/NzcwoT8c0/Ylu/u3/6mFj/CWnQVjNJ0MV2Iuw/U+EJSd2TX5czdAwKPYZIG0YA==}
     peerDependencies:
       react: ^16.11.0 || ^17.0.0
     dependencies:

@@ -1,9 +1,9 @@
 {
   "name": "rescript-swr",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
   "package-specs": {
     "module": "es6",
@@ -17,7 +17,7 @@
     "@rescript/react"
   ],
   "warnings": {
-    "error" : "+101"
+    "error": "+101"
   },
   "namespace": false
 }

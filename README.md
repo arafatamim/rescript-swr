@@ -78,7 +78,7 @@ let make = () => {
 open Swr
 
 // return all global configurations
-let globalConfig: SwrConfiguration.useSWRConfig()
+let globalConfig = SwrConfiguration.useSWRConfig()
 // access configuration property using auto-generated getter
 let refreshInterval = globalConfig->Swr.refreshIntervalGet
 Js.log(refreshInterval)
@@ -154,3 +154,48 @@ useSWR_config: (
 
 ## Credits
 Originally forked from https://github.com/roddyyaga/bs-swr
+
+## Addendum
+### The above examples rewritten in ML syntax
+```ml
+let config : (string, pets, Js.Promise.error) swrConfiguration =
+  swrConfiguration ~refreshInterval:10000 ~loadingTimeout:3000
+    ~fallbackData:{ cats = 0; dogs = 0; hamsters = 0 }
+    ~onLoadingSlow:(fun _ _ -> Js.log "Taking too long")
+    ~onErrorRetry:(fun _err _key _conf revalidate { retryCount } ->
+      Js.Global.setTimeout
+        (fun _ -> (revalidate { retryCount; dedupe = None } [@bs]) |> ignore)
+        5000
+      |> ignore)
+    ~use:
+      [|
+        (fun useSWRNext ->
+          fun [@bs] key fetcher config ->
+           let extendedFetcher args =
+             Js.log2 "SWR Request: " key;
+             fetcher args
+           in
+           (useSWRNext key extendedFetcher config [@bs]));
+      |]
+    ()
+
+let { data } =
+  useSWR_config "/api/user1/pets"
+    (fun _key -> Js.Promise.resolve { cats = 2; dogs = 4; hamsters = 2 })
+    config
+
+(************)
+
+let globalConfig : (string, pets, Js.Promise.error) swrConfiguration =
+  SwrConfiguration.useSWRConfig ()
+let refreshInterval = globalConfig |. refreshIntervalGet;;
+Js.log refreshInterval;;
+
+(************)
+
+globalConfig |. SwrConfiguration.mutate_key "/api/user1/pets";;
+globalConfig
+|. SwrConfiguration.mutate "/api/user1/pets"
+     { dogs = 2; hamsters = 5; cats = 10 }
+     false
+```

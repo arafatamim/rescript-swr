@@ -1,10 +1,10 @@
 {
   "name": "rescript-swr",
   "description": "SWR bindings for ReScript",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/runnerbangladesh/rescript-swr.git"
+    "url": "git+https://github.com/arafatamim/rescript-swr.git"
   },
   "scripts": {
     "prepare": "rescript clean -with-deps && rescript build",
@@ -20,10 +20,14 @@
     "swr"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/runnerbangladesh/rescript-swr/issues"
+  "author": {
+    "name": "Tamim Arafat",
+    "email": "tamim.arafat@gmail.com"
   },
-  "homepage": "https://github.com/runnerbangladesh/rescript-swr#readme",
+  "bugs": {
+    "url": "https://github.com/arafatamim/rescript-swr/issues"
+  },
+  "homepage": "https://github.com/arafatamim/rescript-swr#readme",
   "devDependencies": {
     "rescript": "^9.1.4"
   },
@@ -32,7 +36,7 @@
     "@rescript/react": "^0.10.3"
   },
   "dependencies": {
-    "swr": "1.0.1",
+    "swr": "1.1.0",
     "@rescript/react": "0.10.3"
   }
 }

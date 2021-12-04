@@ -1,6 +1,6 @@
 # rescript-swr
-Nearly low-cost ReScript bindings to [SWR](https://github.com/vercel/swr).
-Supports version ^1.0.0.
+Low-cost ReScript bindings to [SWR](https://github.com/vercel/swr).
+Supports version ^1.0.0. Also includes bindings for `useSWRInfinite`.
 
 ## Installation
 Run
@@ -90,73 +90,17 @@ globalConfig->SwrConfiguration.mutate_key("/api/user1/pets")
 globalConfig->SwrConfiguration.mutate("/api/user1/pets", {dogs: 2, hamsters: 5, cats: 10}, false)
 ```
 
-## API
-### `Swr.swrConfiguration<'key, 'data, 'error>`
-```rescript
-@optional dedupingInterval: int,
-@optional errorRetryInterval: int,
-@optional errorRetryCount: int,
-@optional fallbackData: 'data,
-@optional fallback: Js.Json.t,
-@optional fetcher: fetcher<'key, 'data>,
-@optional focusThrottleInterval: int,
-@optional loadingTimeout: int,
-@optional refreshInterval: int,
-@optional refreshWhenHidden: bool,
-@optional refreshWhenOffline: bool,
-@optional revalidateOnFocus: bool,
-@optional revalidateOnMount: bool,
-@optional revalidateOnReconnect: bool,
-@optional revalidateIfStale: bool,
-@optional shouldRetryOnError: bool,
-@optional suspense: bool,
-@optional use: array<middleware<'key, 'data, 'error, swrConfiguration<'key, 'data, 'error>>>,
-@optional isPaused: unit => bool,
-@optional isOnline: unit => bool,
-@optional isVisible: unit => bool,
-@optional onDiscarded: string => unit,
-@optional onLoadingSlow: (string, swrConfiguration<'key, 'data, 'error>) => unit,
-@optional onSuccess: ('data, string, swrConfiguration<'key, 'data, 'error>) => unit,
-@optional onError: ('error, string, swrConfiguration<'key, 'data, 'error>) => unit,
-@optional
-onErrorRetry: (
-  'error,
-  string,
-  swrConfiguration<'key, 'data, 'error>,
-  revalidateType,
-  revalidatorOptions,
-) => unit,
-@optional compare: (option<'data>, option<'data>) => bool,
-```
-
-### `Swr.fetcher`
-```rescript
-type fetcher1<'arg, 'data> = 'arg => Js.Promise.t<'data>
-type fetcher2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => Js.Promise.t<'data>
-```
-
-### `Swr.useSWR`
-```rescript
-useSWR: (
-  'key,
-  fetcher1<'key, 'data>,
-) => responseInterface<'data, 'error>
-
-useSWR_config: (
-  'key,
-  fetcher1<'key, 'data>,
-  swrConfiguration<string, 'data, 'error>,
-) => responseInterface<'data, 'error>
-
-// Look into the source code for more overloads,
-// or create them yourself as required
-```
+## Documentation
+See [DOCUMENTATION.md](https://github.com/arafatamim/rescript-swr/blob/main/DOCUMENTATION.md).
 
 ## Credits
-Originally forked from https://github.com/roddyyaga/bs-swr
+Originally forked from https://github.com/roddyyaga/bs-swr.
+
+## License
+MIT Licensed. See [LICENSE](https://github.com/arafatamim/rescript-swr/blob/main/LICENSE) file.
 
 ## Addendum
-### The above examples rewritten in ML syntax
+### The above examples written in ML syntax
 ```ml
 let config : (string, pets, Js.Promise.error) swrConfiguration =
   swrConfiguration ~refreshInterval:10000 ~loadingTimeout:3000

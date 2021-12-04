@@ -1,35 +1,11 @@
-type fetcher<'arg, 'data> = array<'arg> => Js.Promise.t<'data>
-type fetcher_sync<'arg, 'data> = array<'arg> => 'data
-type fetcher1<'arg, 'data> = 'arg => Js.Promise.t<'data>
-type fetcher_sync1<'arg, 'data> = 'arg => 'data
-type fetcher2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => Js.Promise.t<'data>
-type fetcher_sync2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => 'data
-type fetcher3<'arg1, 'arg2, 'arg3, 'data> = ('arg1, 'arg2, 'arg3) => Js.Promise.t<'data>
-type fetcher_sync3<'arg1, 'arg2, 'arg3, 'data> = ('arg1, 'arg2, 'arg3) => 'data
+open Common
 
 type swrResponse<'data, 'error> = {
   data: option<'data>,
   error: 'error,
-  mutate: (. option<'data>, option<bool>) => Js.Promise.t<option<'data>>,
+  mutate: keyedMutator<'data>,
   isValidating: bool,
 }
-
-type revalidatorOptions = {retryCount: option<int>, dedupe: option<bool>}
-
-type revalidateType = (. revalidatorOptions) => Js.Promise.t<option<bool>>
-
-type swrHook<'key, 'data, 'error, 'config> = (
-  . 'key,
-  fetcher<'key, 'data>,
-  'config,
-) => swrResponse<'data, 'error>
-
-type middleware<'key, 'data, 'error, 'config> = (
-  swrHook<'key, 'data, 'error, 'config>,
-  . 'key,
-  fetcher<'key, 'data>,
-  'config,
-) => swrResponse<'data, 'error>
 
 @deriving(abstract)
 type rec swrConfiguration<'key, 'data, 'error> = {
@@ -39,7 +15,7 @@ type rec swrConfiguration<'key, 'data, 'error> = {
   @optional errorRetryCount: int,
   @optional fallbackData: 'data,
   @optional fallback: Js.Json.t,
-  @optional fetcher: fetcher<'key, 'data>,
+  @optional fetcher: fetcher1<'key, 'data>,
   @optional focusThrottleInterval: int,
   @optional loadingTimeout: int,
   @optional refreshInterval: int,
@@ -51,7 +27,16 @@ type rec swrConfiguration<'key, 'data, 'error> = {
   @optional revalidateIfStale: bool,
   @optional shouldRetryOnError: bool,
   @optional suspense: bool,
-  @optional use: array<middleware<'key, 'data, 'error, swrConfiguration<'key, 'data, 'error>>>,
+  @optional
+  use: array<
+    middleware<
+      'key,
+      'data,
+      'error,
+      swrConfiguration<'key, 'data, 'error>,
+      swrResponse<'data, 'error>,
+    >,
+  >,
   @optional isPaused: unit => bool,
   @optional isOnline: unit => bool,
   @optional isVisible: unit => bool,

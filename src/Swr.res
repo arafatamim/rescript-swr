@@ -63,16 +63,6 @@ external useSWR_config: (
   swrConfiguration<'arg, 'data>,
 ) => swrResponse<'data> = "default"
 
-@val @module("swr")
-external useSWR_string: (string, fetcher1<string, 'data>) => swrResponse<'data> = "default"
-
-@val @module("swr")
-external useSWR_string_config: (
-  string,
-  fetcher1<string, 'data>,
-  swrConfiguration<string, 'data>,
-) => swrResponse<'data> = "default"
-
 /* array must be of length 1 */
 @val @module("swr")
 external useSWR1: (array<'arg>, fetcher1<'arg, 'data>) => swrResponse<'data> = "default"

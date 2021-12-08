@@ -1,10 +1,10 @@
-open Common
+open SwrCommon
 
 type keyLoader<'key, 'data> = (int, Js.nullable<array<'data>>) => 'key
 
-type swrInfiniteResponse<'data, 'error> = {
+type swrInfiniteResponse<'data> = {
   data: option<array<'data>>,
-  error: 'error,
+  error: option<exn>,
   mutate: keyedMutator<array<'data>>,
   isValidating: bool,
   size: int,
@@ -12,7 +12,7 @@ type swrInfiniteResponse<'data, 'error> = {
 }
 
 @deriving(abstract)
-type rec swrInfiniteConfiguration<'key, 'data, 'error> = {
+type rec swrInfiniteConfiguration<'key, 'data> = {
   @optional dedupingInterval: int,
   @optional errorRetryInterval: int,
   @optional errorRetryCount: int,
@@ -35,24 +35,23 @@ type rec swrInfiniteConfiguration<'key, 'data, 'error> = {
     middleware<
       'key,
       array<'data>,
-      'error,
-      swrInfiniteConfiguration<'key, array<'data>, 'error>,
-      swrInfiniteResponse<array<'data>, 'error>,
+      swrInfiniteConfiguration<'key, array<'data>>,
+      swrInfiniteResponse<array<'data>>,
     >,
   >,
   @optional isPaused: unit => bool,
   @optional isOnline: unit => bool,
   @optional isVisible: unit => bool,
   @optional onDiscarded: string => unit,
-  @optional onLoadingSlow: (string, swrInfiniteConfiguration<'key, array<'data>, 'error>) => unit,
+  @optional onLoadingSlow: (string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
   @optional
-  onSuccess: (array<'data>, string, swrInfiniteConfiguration<'key, array<'data>, 'error>) => unit,
-  @optional onError: ('error, string, swrInfiniteConfiguration<'key, array<'data>, 'error>) => unit,
+  onSuccess: (array<'data>, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
+  @optional onError: (exn, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
   @optional
   onErrorRetry: (
-    'error,
+    exn,
     string,
-    swrInfiniteConfiguration<'key, array<'data>, 'error>,
+    swrInfiniteConfiguration<'key, array<'data>>,
     revalidateType,
     revalidatorOptions,
   ) => unit,
@@ -68,11 +67,14 @@ type rec swrInfiniteConfiguration<'key, 'data, 'error> = {
 external useSWRInfinite: (
   keyLoader<'arg, 'data>,
   fetcher1<'arg, 'data>,
-) => swrInfiniteResponse<'data, 'error> = "default"
+) => swrInfiniteResponse<'data> = "default"
 
 @val @module("swr/infinite")
 external useSWRInfinite_config: (
   keyLoader<'arg, 'data>,
   fetcher1<'arg, 'data>,
-  swrInfiniteConfiguration<'key, 'data, 'error>,
-) => swrInfiniteResponse<'data, 'error> = "default"
+  swrInfiniteConfiguration<'key, 'data>,
+) => swrInfiniteResponse<'data> = "default"
+
+@ocaml.doc(`[setConfigProperty] is used to unsafely set a configuration property.`) @set_index
+external setConfigProperty: (swrInfiniteConfiguration<'key, 'data>, string, 'val) => unit = ""

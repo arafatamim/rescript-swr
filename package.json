@@ -1,7 +1,7 @@
 {
   "name": "rescript-swr",
   "description": "SWR bindings for ReScript",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arafatamim/rescript-swr.git"

@@ -11,4 +11,4 @@ debug.log
 *.cmj
 *.cmt
 *.bs.js
-
+/examples/

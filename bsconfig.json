@@ -1,10 +1,17 @@
 {
   "name": "rescript-swr",
   "version": "1.2.0",
-  "sources": {
-    "dir": "src",
-    "subdirs": true
-  },
+  "sources": [
+    {
+      "dir": "examples",
+      "subdirs": true,
+      "type": "dev"
+    },
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
   "package-specs": {
     "module": "es6",
     "in-source": true

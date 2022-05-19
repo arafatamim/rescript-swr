@@ -1,29 +1,46 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 specifiers:
-  '@rescript/react': ^0.10.3
+  '@rescript/react': 0.10.3
+  react: ^18.1.0
   rescript: ^9.1.4
-  swr: ^1.0.0
+  swr: 2.0.0-beta.3
 
 dependencies:
-  '@rescript/react': 0.10.3
-  swr: 1.0.1
+  '@rescript/react': 0.10.3_react@18.1.0
+  react: 18.1.0
+  swr: 2.0.0-beta.3_react@18.1.0
 
 devDependencies:
   rescript: 9.1.4
 
 packages:
 
-  /@rescript/react/0.10.3:
+  /@rescript/react/0.10.3_react@18.1.0:
     resolution: {integrity: sha512-Lf9rzrR3bQPKJjOK3PBRa/B3xrJ7CqQ1HYr9VHPVxJidarIJJFZBhj0Dg1uZURX+Wg/xiP0PHFxXmdj2bK8Vxw==}
     peerDependencies:
       react: '>=16.8.1'
       react-dom: '>=16.8.1'
+    dependencies:
+      react: 18.1.0
     dev: false
 
-  /dequal/2.0.2:
-    resolution: {integrity: sha512-q9K8BlJVxK7hQYqa6XISGmBZbtQQWVXSrRrWreHC94rMt1QL/Impruc+7p2CYSYuVIUr+YCt6hjrs1kkdJRTug==}
-    engines: {node: '>=6'}
+  /js-tokens/4.0.0:
+    resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+    dev: false
+
+  /loose-envify/1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
+    dependencies:
+      js-tokens: 4.0.0
+    dev: false
+
+  /react/18.1.0:
+    resolution: {integrity: sha512-4oL8ivCz5ZEPyclFQXaNksK3adutVS8l2xzZU0cqEFrE9Sb7fC0EFK5uEk74wIreL1DERyjvsU915j1pcT2uEQ==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      loose-envify: 1.4.0
     dev: false
 
   /rescript/9.1.4:
@@ -32,10 +49,19 @@ packages:
     requiresBuild: true
     dev: true
 
-  /swr/1.0.1:
-    resolution: {integrity: sha512-EPQAxSjoD4IaM49rpRHK0q+/NzcwoT8c0/Ylu/u3/6mFj/CWnQVjNJ0MV2Iuw/U+EJSd2TX5czdAwKPYZIG0YA==}
+  /swr/2.0.0-beta.3_react@18.1.0:
+    resolution: {integrity: sha512-rXE6mDVUDgbsMDHCliXfbtPoiXFH9x4RXQnJ2bIEM9tLvYErToZ+G4ESbSxC+gbKNwZd/itU60UcTN5femcKzQ==}
     peerDependencies:
-      react: ^16.11.0 || ^17.0.0
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      dequal: 2.0.2
+      react: 18.1.0
+      use-sync-external-store: 1.1.0_react@18.1.0
+    dev: false
+
+  /use-sync-external-store/1.1.0_react@18.1.0:
+    resolution: {integrity: sha512-SEnieB2FPKEVne66NpXPd1Np4R1lTNKfjuy3XdIoPQKYBAFdzbzSZlSn1KJZUiihQLQC5Znot4SBz1EOTBwQAQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.1.0
     dev: false

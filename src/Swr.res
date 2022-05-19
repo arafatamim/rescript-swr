@@ -5,6 +5,7 @@ type swrResponse<'data> = {
   error: option<exn>,
   mutate: keyedMutator<'data>,
   isValidating: bool,
+  isLoading: bool
 }
 
 @deriving(abstract)
@@ -14,9 +15,10 @@ type rec swrConfiguration<'key, 'data> = {
   @optional errorRetryInterval: int,
   @optional errorRetryCount: int,
   @optional fallbackData: 'data,
-  @optional fallback: Js.Json.t,
-  @optional fetcher: fetcher1<'key, 'data>,
+  @optional fallback: Obj.t,
+  @optional fetcher: fetcher<'key, 'data>,
   @optional focusThrottleInterval: int,
+  @optional keepPreviousData: bool,
   @optional loadingTimeout: int,
   @optional refreshInterval: int,
   @optional refreshWhenHidden: bool,
@@ -47,42 +49,27 @@ type rec swrConfiguration<'key, 'data> = {
   @optional compare: (option<'data>, option<'data>) => bool,
 }
 
-type cache<'data> = {
-  get: (. string) => Js.Nullable.t<'data>,
-  set: (. string, 'data) => unit,
-  delete: (. string) => unit,
+type cacheState<'data> = {
+  data: option<'data>,
+  error: option<exn>,
+  isLoading: bool,
+  isValidating: bool,
+}
+
+type rec cache<'data> = {
+  get: (. string) => Js.Nullable.t<cacheState<'data>>,
+  set: (. string, cacheState<'data>) => unit,
+  delete: (. string) => bool,
 }
 
 @val @module("swr")
-external useSWR: ('arg, fetcher1<'arg, 'data>) => swrResponse<'data> = "default"
+external useSWR: ('arg, fetcher<'arg, 'data>) => swrResponse<'data> = "default"
 
 @val @module("swr")
 external useSWR_config: (
   'arg,
-  fetcher1<'arg, 'data>,
+  fetcher<'arg, 'data>,
   swrConfiguration<'arg, 'data>,
-) => swrResponse<'data> = "default"
-
-/* array must be of length 1 */
-@val @module("swr")
-external useSWR1: (array<'arg>, fetcher1<'arg, 'data>) => swrResponse<'data> = "default"
-
-/* array must be of length 1 */
-@val @module("swr")
-external useSWR1_config: (
-  array<'arg>,
-  fetcher1<'arg, 'data>,
-  swrConfiguration<array<'arg>, 'data>,
-) => swrResponse<'data> = "default"
-
-@val @module("swr")
-external useSWR2: (('arg1, 'arg2), fetcher2<'arg1, 'arg2, 'data>) => swrResponse<'data> = "default"
-
-@val @module("swr")
-external useSWR2_config: (
-  ('arg1, 'arg2),
-  fetcher2<'arg1, 'arg2, 'data>,
-  swrConfiguration<('arg1, 'arg2), 'data>,
 ) => swrResponse<'data> = "default"
 
 module SwrConfigProvider = {
@@ -100,11 +87,16 @@ module SwrConfigProvider = {
 module SwrConfiguration = {
   @send
   @ocaml.doc(`[mutate_key: (config, key)] broadcasts a revalidation message globally to other SWR hooks`)
-  external mutate_key: (swrConfiguration<'key, 'data>, 'key) => unit = "mutate"
+  external mutate_key: (swrConfiguration<'key, 'data>, 'key) => Js.Promise.t<Obj.t> = "mutate"
 
   @send
-  @ocaml.doc(`[mutate: (config, key, data, shouldRevalidate)] is used to update local data programmatically, while revalidating and finally replacing it with the latest data.`)
-  external mutate: (swrConfiguration<'key, 'data>, 'key, 'data, bool) => unit = "mutate"
+  @ocaml.doc(`[mutate_key_data: (config, key, data)] broadcasts a revalidation message globally to other SWR hooks and replacing with latest data`)
+  external mutate_key_data: (swrConfiguration<'key, 'data>, 'key, 'data) => Js.Promise.t<Obj.t> = "mutate"
+
+  @send
+  @ocaml.doc(`[mutate: (config, key, data, mutatorOptions)] is used to update local data programmatically, while revalidating and finally replacing it with the latest data.`)
+  external mutate: (swrConfiguration<'key, 'data>, 'key, 'data, mutatorOptions<'data>) => Js.Promise.t<Obj.t> =
+    "mutate"
 
   @get
   external cache: swrConfiguration<'key, 'data> => cache<'data> = "cache"
@@ -123,7 +115,7 @@ external getConfigProperty: (swrConfiguration<'key, 'data>, string) => 'val = ""
 @module("swr/immutable")
 external useSWRImmutable: (
   'arg,
-  fetcher1<'arg, 'data>,
+  fetcher<'arg, 'data>,
   swrConfiguration<'arg, 'data>,
 ) => swrResponse<'data> = "default"
 

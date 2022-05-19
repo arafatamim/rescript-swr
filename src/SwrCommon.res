@@ -1,11 +1,5 @@
-type fetcher<'arg, 'data> = array<'arg> => Js.Promise.t<'data>
-type fetcher_sync<'arg, 'data> = array<'arg> => 'data
-type fetcher1<'arg, 'data> = 'arg => Js.Promise.t<'data>
-type fetcher_sync1<'arg, 'data> = 'arg => 'data
-type fetcher2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => Js.Promise.t<'data>
-type fetcher_sync2<'arg1, 'arg2, 'data> = ('arg1, 'arg2) => 'data
-type fetcher3<'arg1, 'arg2, 'arg3, 'data> = ('arg1, 'arg2, 'arg3) => Js.Promise.t<'data>
-type fetcher_sync3<'arg1, 'arg2, 'arg3, 'data> = ('arg1, 'arg2, 'arg3) => 'data
+type fetcher<'arg, 'data> = 'arg => Js.Promise.t<'data>
+type fetcher_sync<'arg, 'data> = 'arg => 'data
 
 type swrHook<'key, 'data, 'config, 'response> = (. 'key, fetcher<'key, 'data>, 'config) => 'response
 
@@ -22,16 +16,21 @@ type revalidateType = (. revalidatorOptions) => Js.Promise.t<option<bool>>
 
 type mutatorCallback<'data> = option<'data> => Js.Promise.t<'data>
 
+@deriving(abstract)
+type mutatorOptions<'data> = {
+  @optional revalidate: bool,
+  @optional populateCache: (Obj.t, 'data) => 'data,
+  @optional optimisticData: 'data => 'data,
+  @optional rollbackOnError: bool,
+}
+
 type keyedMutator<'data> = (
   . option<mutatorCallback<'data>>,
-  option<bool>,
+  option<mutatorOptions<'data>>,
 ) => Js.Promise.t<option<'data>>
-
-@ocaml.doc(`[makeFallback] is used to create an object to provide global fallback data.`)
-external makeFallback: {..} => Js.Json.t = "%identity"
 
 @module("swr") @val
 external mutate_key: 'key => unit = "mutate"
 
 @module("swr") @val
-external mutate: ('key, 'data, bool) => unit = "mutate"
+external mutate: ('key, 'data, option<mutatorOptions<'data>>) => unit = "mutate"

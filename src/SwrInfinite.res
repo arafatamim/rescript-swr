@@ -1,11 +1,12 @@
 open SwrCommon
 
-type keyLoader<'key, 'data> = (int, Js.nullable<array<'data>>) => 'key
+type keyLoader<'key, 'data> = (int, Obj.t) => 'key
 
 type swrInfiniteResponse<'data> = {
   data: option<array<'data>>,
   error: option<exn>,
   mutate: keyedMutator<array<'data>>,
+  isLoading: bool,
   isValidating: bool,
   size: int,
   setSize: (. int => int) => Js.Promise.t<option<array<'data>>>,
@@ -17,9 +18,10 @@ type rec swrInfiniteConfiguration<'key, 'data> = {
   @optional errorRetryInterval: int,
   @optional errorRetryCount: int,
   @optional fallbackData: array<'data>,
-  @optional fallback: Js.Json.t,
-  @optional fetcher: fetcher1<'key, 'data>,
+  @optional fallback: Obj.t,
+  @optional fetcher: fetcher<'key, 'data>,
   @optional focusThrottleInterval: int,
+  @optional keepPreviousData: bool,
   @optional loadingTimeout: int,
   @optional refreshInterval: int,
   @optional refreshWhenHidden: bool,
@@ -66,13 +68,13 @@ type rec swrInfiniteConfiguration<'key, 'data> = {
 @val @module("swr/infinite")
 external useSWRInfinite: (
   keyLoader<'arg, 'data>,
-  fetcher1<'arg, 'data>,
+  fetcher<'arg, 'data>,
 ) => swrInfiniteResponse<'data> = "default"
 
 @val @module("swr/infinite")
 external useSWRInfinite_config: (
   keyLoader<'arg, 'data>,
-  fetcher1<'arg, 'data>,
+  fetcher<'arg, 'data>,
   swrInfiniteConfiguration<'key, 'data>,
 ) => swrInfiniteResponse<'data> = "default"
 

@@ -11,6 +11,31 @@ external stringifyArray: array<'t> => string = "stringify"
 @val @scope("window")
 external addEventListener: (string, 'event => unit) => unit = "addEventListener"
 
+let wrapDataIntoCacheState = data => {
+  data: Some(data),
+  error: None,
+  isLoading: false,
+  isValidating: false,
+}
+
+let setupCache = map => {
+  open Belt
+
+  {
+    get: (. key) => {
+      wrapDataIntoCacheState(map->HashMap.String.get(key)->Option.getWithDefault(""))->Js.Nullable.return
+    },
+    set: (. key, value) => {
+      map->HashMap.String.set(key, value.data->Option.getWithDefault(""))
+
+    },
+    delete: (. key) => {
+      map->HashMap.String.remove(key)
+      true
+    },
+  }
+}
+
 /*
   Example stolen from
   https://swr.vercel.app/docs/advanced/cache#localstorage-based-persistent-cache
@@ -28,11 +53,7 @@ let localStorageProvider: unit => cache<string> = () => {
     localStorage->setItem("app-cache", appCache)
   })
 
-  {
-    get: (. key) => map->Belt.HashMap.String.get(key)->Js.Nullable.fromOption,
-    set: (. key, value) => map->Belt.HashMap.String.set(key, value),
-    delete: (. key) => map->Belt.HashMap.String.remove(key),
-  }
+  setupCache(map)
 }
 
 module LocalStorageProvider = {

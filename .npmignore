@@ -12,3 +12,5 @@ debug.log
 *.cmt
 *.bs.js
 /examples/
+
+prepublish.sh

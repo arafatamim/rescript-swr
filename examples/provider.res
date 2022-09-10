@@ -23,11 +23,12 @@ let setupCache = map => {
 
   {
     get: (. key) => {
-      wrapDataIntoCacheState(map->HashMap.String.get(key)->Option.getWithDefault(""))->Js.Nullable.return
+      wrapDataIntoCacheState(
+        map->HashMap.String.get(key)->Option.getWithDefault(""),
+      )->Js.Nullable.return
     },
     set: (. key, value) => {
       map->HashMap.String.set(key, value.data->Option.getWithDefault(""))
-
     },
     delete: (. key) => {
       map->HashMap.String.remove(key)
@@ -59,8 +60,10 @@ let localStorageProvider: unit => cache<string> = () => {
 module LocalStorageProvider = {
   @react.component
   let make = () => {
-    let config = swrConfiguration(~revalidateOnFocus=false, ())
+    let config = {revalidateOnFocus: false}
     config->SwrConfigProvider.setCacheProvider(_cache => localStorageProvider())
-    <SwrConfigProvider value={config}> <div /> </SwrConfigProvider>
+    <SwrConfigProvider value={config => {...config, suspense: true}}>
+      <div />
+    </SwrConfigProvider>
   }
 }

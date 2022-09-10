@@ -1,10 +1,10 @@
 open SwrCommon
 
-type keyLoader<'key, 'data> = (int, Obj.t) => 'key
+type keyLoader<'key, 'any> = (int, option<'any>) => option<'key>
 
 type swrInfiniteResponse<'data> = {
   data: option<array<'data>>,
-  error: option<exn>,
+  error: option<Js.Exn.t>,
   mutate: keyedMutator<array<'data>>,
   isLoading: bool,
   isValidating: bool,
@@ -12,28 +12,26 @@ type swrInfiniteResponse<'data> = {
   setSize: (. int => int) => Js.Promise.t<option<array<'data>>>,
 }
 
-@deriving(abstract)
 type rec swrInfiniteConfiguration<'key, 'data> = {
-  @optional dedupingInterval: int,
-  @optional errorRetryInterval: int,
-  @optional errorRetryCount: int,
-  @optional fallbackData: array<'data>,
-  @optional fallback: Obj.t,
-  @optional fetcher: fetcher<'key, 'data>,
-  @optional focusThrottleInterval: int,
-  @optional keepPreviousData: bool,
-  @optional loadingTimeout: int,
-  @optional refreshInterval: int,
-  @optional refreshWhenHidden: bool,
-  @optional refreshWhenOffline: bool,
-  @optional revalidateOnFocus: bool,
-  @optional revalidateOnMount: bool,
-  @optional revalidateOnReconnect: bool,
-  @optional revalidateIfStale: bool,
-  @optional shouldRetryOnError: bool,
-  @optional suspense: bool,
-  @optional
-  use: array<
+  dedupingInterval?: int,
+  errorRetryInterval?: int,
+  errorRetryCount?: int,
+  fallbackData?: array<'data>,
+  fallback?: Obj.t,
+  fetcher?: fetcher<'key, 'data>,
+  focusThrottleInterval?: int,
+  keepPreviousData?: bool,
+  loadingTimeout?: int,
+  refreshInterval?: int,
+  refreshWhenHidden?: bool,
+  refreshWhenOffline?: bool,
+  revalidateOnFocus?: bool,
+  revalidateOnMount?: bool,
+  revalidateOnReconnect?: bool,
+  revalidateIfStale?: bool,
+  shouldRetryOnError?: bool,
+  suspense?: bool,
+  use?: array<
     middleware<
       'key,
       array<'data>,
@@ -41,39 +39,37 @@ type rec swrInfiniteConfiguration<'key, 'data> = {
       swrInfiniteResponse<array<'data>>,
     >,
   >,
-  @optional isPaused: unit => bool,
-  @optional isOnline: unit => bool,
-  @optional isVisible: unit => bool,
-  @optional onDiscarded: string => unit,
-  @optional onLoadingSlow: (string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
-  @optional
-  onSuccess: (array<'data>, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
-  @optional onError: (exn, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
-  @optional
-  onErrorRetry: (
-    exn,
+  isPaused?: unit => bool,
+  isOnline?: unit => bool,
+  isVisible?: unit => bool,
+  onDiscarded?: string => unit,
+  onLoadingSlow?: (string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
+  onSuccess?: (array<'data>, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
+  onError?: (Js.Exn.t, string, swrInfiniteConfiguration<'key, array<'data>>) => unit,
+  onErrorRetry?: (
+    Js.Exn.t,
     string,
     swrInfiniteConfiguration<'key, array<'data>>,
     revalidateType,
     revalidatorOptions,
   ) => unit,
-  @optional compare: (option<array<'data>>, option<array<'data>>) => bool,
+  compare?: (option<array<'data>>, option<array<'data>>) => bool,
   /* infinite hook-specific options */
-  @optional initialSize: int,
-  @optional revalidateAll: bool,
-  @optional persistSize: bool,
-  @optional revalidateFirstPage: bool,
+  initialSize?: int,
+  revalidateAll?: bool,
+  persistSize?: bool,
+  revalidateFirstPage?: bool,
 }
 
 @val @module("swr/infinite")
 external useSWRInfinite: (
-  keyLoader<'arg, 'data>,
+  keyLoader<'arg, 'any>,
   fetcher<'arg, 'data>,
 ) => swrInfiniteResponse<'data> = "default"
 
 @val @module("swr/infinite")
 external useSWRInfinite_config: (
-  keyLoader<'arg, 'data>,
+  keyLoader<'arg, 'any>,
   fetcher<'arg, 'data>,
   swrInfiniteConfiguration<'key, 'data>,
 ) => swrInfiniteResponse<'data> = "default"

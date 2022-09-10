@@ -1,15 +1,32 @@
-type deferred<'data> =
-  Initial | Pending | Refresh(result<'data, exn>) | Replete(result<'data, exn>) | Invalid
+type error = {message: string}
 
-type mutator<'data> = (
-  ~data: SwrCommon.mutatorCallback<'data>=?,
-  ~opts: SwrCommon.mutatorOptions<'data>=?,
+let makeError: string => error = message => {message: message}
+
+type deferred<'data> =
+  Initial | Pending | Refresh(result<'data, error>) | Replete(result<'data, error>) | Invalid
+
+type mutatorData<'data> =
+  | Refresh
+  | Overwrite(option<'data> => option<'data>)
+  | OverwriteAsync(option<'data> => option<Js.Promise.t<'data>>)
+  | Clear
+
+type scopedMutatorKey<'key> = Key('key) | Filter('key => bool)
+
+type scopedMutatorType<'key, 'data> = (scopedMutatorKey<'key>, mutatorData<'data>)
+
+type keyedMutator<'data> = (
+  mutatorData<'data>,
+  ~revalidate: bool=?,
+  ~populateCache: (Obj.t, 'data) => 'data=?,
+  ~optimisticData: 'data => 'data=?,
+  ~rollbackOnError: bool=?,
   unit,
-) => Js.Promise.t<option<'data>>
+) => option<Js.Promise.t<'data>>
 
 type swrResponse<'data> = {
   result: deferred<'data>,
-  mutate: mutator<'data>,
+  mutate: keyedMutator<'data>,
 }
 
 let useSWR = (
@@ -26,27 +43,79 @@ let useSWR = (
   | {data: None, error: None, isValidating: false, isLoading: false} => Initial
   | {data: None, error: None, isValidating: _, isLoading: true} => Pending
   | {data: Some(data), error: None, isValidating: true, isLoading: _} => Refresh(Ok(data))
-  | {data: _, error: Some(err), isValidating: true, isLoading: _} => Refresh(Error(err))
+  | {data: _, error: Some(err), isValidating: true, isLoading: _} =>
+    err->Js.Exn.message->Belt.Option.getWithDefault("Unknown JS Error!")->makeError->Error->Refresh
   | {data: Some(data), error: None, isValidating: false, isLoading: false} => Replete(Ok(data))
-  | {data: None, error: Some(error), isValidating: false, isLoading: false} => Replete(Error(error))
+  | {data: None, error: Some(err), isValidating: false, isLoading: false} =>
+    err->Js.Exn.message->Belt.Option.getWithDefault("Unknown JS Error!")->makeError->Error->Replete
   | {data: _, error: _, isValidating: _, isLoading: _} => Invalid
   }
 
   let mutate = (
-    ~data: option<SwrCommon.mutatorCallback<'data>>=?,
-    ~opts: option<SwrCommon.mutatorOptions<'data>>=?,
+    type': mutatorData<'data>,
+    ~revalidate: option<bool>=?,
+    ~populateCache: option<(Obj.t, 'data) => 'data>=?,
+    ~optimisticData: option<'data => 'data>=?,
+    ~rollbackOnError: option<bool>=?,
     (),
   ) => {
-    switch (data, opts) {
-    | (Some(data), None) => swr.mutate(. Some(data), None)
-    | (None, Some(opts)) => swr.mutate(. None, Some(opts))
-    | (Some(data), Some(opts)) => swr.mutate(. Some(data), Some(opts))
-    | (None, None) => swr.mutate(. Some(data => Obj.magic(data)), None)
+    open SwrCommon
+
+    let opts = {
+      ?revalidate,
+      ?populateCache,
+      ?optimisticData,
+      ?rollbackOnError,
+    }
+
+    switch type' {
+    | Refresh => swr.mutate(. Obj.magic, Some(opts))
+    | Overwrite(cb) => swr.mutate(. Obj.magic(cb), Some(opts))
+    | OverwriteAsync(cb) => swr.mutate(. cb, Some(opts))
+    | Clear => swr.mutate(. _ => None, Some(opts))
     }
   }
 
   {
-    result: result,
-    mutate: mutate,
+    result,
+    mutate,
+  }
+}
+
+module SwrConfiguration = {
+  include Swr.SwrConfiguration
+
+  let mutate = (
+    config,
+    key,
+    data,
+    ~revalidate=?,
+    ~populateCache=?,
+    ~optimisticData=?,
+    ~rollbackOnError=?,
+    (),
+  ) => {
+    open SwrCommon
+
+    let opts = {
+      ?revalidate,
+      ?populateCache,
+      ?optimisticData,
+      ?rollbackOnError,
+    }
+
+    config->mutateWithOpts_async(
+      switch key {
+      | Key(key) => #Key(key)
+      | Filter(fn) => #Filter(fn)
+      },
+      switch data {
+      | Refresh => Obj.magic
+      | Overwrite(fn) => x => fn(x)->Belt.Option.map(Obj.magic)
+      | OverwriteAsync(fn) => fn
+      | Clear => _ => None
+      },
+      Some(opts),
+    )
   }
 }

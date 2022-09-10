@@ -1,12 +1,13 @@
 {
   "name": "rescript-swr",
   "description": "SWR bindings for ReScript",
-  "version": "2.0.0",
+  "version": "3.0.0-beta.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arafatamim/rescript-swr.git"
   },
   "scripts": {
+    "prepublishOnly": "sh prepublish.sh",
     "prepare": "rescript clean -with-deps && rescript build",
     "build": "rescript build",
     "start": "rescript build -w",
@@ -29,15 +30,16 @@
   },
   "homepage": "https://github.com/arafatamim/rescript-swr#readme",
   "devDependencies": {
-    "rescript": "^9.1.4"
+    "react-dom": "^18.2.0",
+    "rescript": "^10.0.1"
   },
   "peerDependencies": {
     "@rescript/react": "^0.10.3",
-    "swr": "^2.0.0-beta.3"
+    "swr": "^2.0.0-beta.6"
   },
   "dependencies": {
     "@rescript/react": "0.10.3",
-    "react": "^18.1.0",
-    "swr": "2.0.0-beta.3"
+    "react": "^18.2.0",
+    "swr": "2.0.0-beta.6"
   }
 }

@@ -10,27 +10,20 @@ type middleware<'key, 'data, 'config, 'response> = (
   'config,
 ) => 'response
 
-type revalidatorOptions = {retryCount: option<int>, dedupe: option<bool>}
+type revalidatorOptions = {retryCount?: int, dedupe?: bool}
 
 type revalidateType = (. revalidatorOptions) => Js.Promise.t<option<bool>>
 
-type mutatorCallback<'data> = option<'data> => Js.Promise.t<'data>
+type mutatorCallback<'data> = option<'data> => option<Js.Promise.t<'data>>
 
-@deriving(abstract)
 type mutatorOptions<'data> = {
-  @optional revalidate: bool,
-  @optional populateCache: (Obj.t, 'data) => 'data,
-  @optional optimisticData: 'data => 'data,
-  @optional rollbackOnError: bool,
+  revalidate?: bool,
+  populateCache?: (Obj.t, 'data) => 'data,
+  optimisticData?: 'data => 'data,
+  rollbackOnError?: bool,
 }
 
 type keyedMutator<'data> = (
-  . option<mutatorCallback<'data>>,
+  . mutatorCallback<'data>,
   option<mutatorOptions<'data>>,
-) => Js.Promise.t<option<'data>>
-
-@module("swr") @val
-external mutate_key: 'key => unit = "mutate"
-
-@module("swr") @val
-external mutate: ('key, 'data, option<mutatorOptions<'data>>) => unit = "mutate"
+) => option<Js.Promise.t<'data>>

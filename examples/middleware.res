@@ -12,6 +12,11 @@ let logger = (useSWRNext, . key, fetcher, config) => {
   useSWRNext(. key, extendedFetcher, config)
 }
 
-let config = swrConfiguration(~use=[logger], ())
-let swr = useSWR_config("key", Fetch.fetcher, config)
+let swr = useSWR_config(
+  "key",
+  Fetch.fetcher,
+  {
+    use: [logger],
+  },
+)
 Js.log(swr.data)

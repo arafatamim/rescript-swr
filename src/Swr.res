@@ -2,56 +2,53 @@ open SwrCommon
 
 type swrResponse<'data> = {
   data: option<'data>,
-  error: option<exn>,
+  error: option<Js.Exn.t>,
   mutate: keyedMutator<'data>,
   isValidating: bool,
-  isLoading: bool
+  isLoading: bool,
 }
 
-@deriving(abstract)
 type rec swrConfiguration<'key, 'data> = {
   /* Global options */
-  @optional dedupingInterval: int,
-  @optional errorRetryInterval: int,
-  @optional errorRetryCount: int,
-  @optional fallbackData: 'data,
-  @optional fallback: Obj.t,
-  @optional fetcher: fetcher<'key, 'data>,
-  @optional focusThrottleInterval: int,
-  @optional keepPreviousData: bool,
-  @optional loadingTimeout: int,
-  @optional refreshInterval: int,
-  @optional refreshWhenHidden: bool,
-  @optional refreshWhenOffline: bool,
-  @optional revalidateOnFocus: bool,
-  @optional revalidateOnMount: bool,
-  @optional revalidateOnReconnect: bool,
-  @optional revalidateIfStale: bool,
-  @optional shouldRetryOnError: bool,
-  @optional suspense: bool,
-  @optional
-  use: array<middleware<'key, 'data, swrConfiguration<'key, 'data>, swrResponse<'data>>>,
-  @optional isPaused: unit => bool,
-  @optional isOnline: unit => bool,
-  @optional isVisible: unit => bool,
-  @optional onDiscarded: string => unit,
-  @optional onLoadingSlow: (string, swrConfiguration<'key, 'data>) => unit,
-  @optional onSuccess: ('data, string, swrConfiguration<'key, 'data>) => unit,
-  @optional onError: (exn, string, swrConfiguration<'key, 'data>) => unit,
-  @optional
-  onErrorRetry: (
-    exn,
+  dedupingInterval?: int,
+  errorRetryInterval?: int,
+  errorRetryCount?: int,
+  fallbackData?: 'data,
+  fallback?: Obj.t,
+  fetcher?: fetcher<'key, 'data>,
+  focusThrottleInterval?: int,
+  keepPreviousData?: bool,
+  loadingTimeout?: int,
+  refreshInterval?: int,
+  refreshWhenHidden?: bool,
+  refreshWhenOffline?: bool,
+  revalidateOnFocus?: bool,
+  revalidateOnMount?: bool,
+  revalidateOnReconnect?: bool,
+  revalidateIfStale?: bool,
+  shouldRetryOnError?: bool,
+  suspense?: bool,
+  use?: array<middleware<'key, 'data, swrConfiguration<'key, 'data>, swrResponse<'data>>>,
+  isPaused?: unit => bool,
+  isOnline?: unit => bool,
+  isVisible?: unit => bool,
+  onDiscarded?: string => unit,
+  onLoadingSlow?: (string, swrConfiguration<'key, 'data>) => unit,
+  onSuccess?: ('data, string, swrConfiguration<'key, 'data>) => unit,
+  onError?: (Js.Exn.t, string, swrConfiguration<'key, 'data>) => unit,
+  onErrorRetry?: (
+    Js.Exn.t,
     string,
     swrConfiguration<'key, 'data>,
     revalidateType,
     revalidatorOptions,
   ) => unit,
-  @optional compare: (option<'data>, option<'data>) => bool,
+  compare?: (option<'data>, option<'data>) => bool,
 }
 
 type cacheState<'data> = {
   data: option<'data>,
-  error: option<exn>,
+  error: option<Js.Exn.t>,
   isLoading: bool,
   isValidating: bool,
 }
@@ -75,42 +72,74 @@ external useSWR_config: (
 module SwrConfigProvider = {
   @module("swr") @react.component
   external make: (
-    ~value: swrConfiguration<'key, 'data>,
+    ~value: swrConfiguration<'key, 'data> => swrConfiguration<'key, 'data>,
     ~children: React.element,
   ) => React.element = "SWRConfig"
 
   @ocaml.doc("[setCacheProvider] sets the ``provider`` property on configuration object") @set
   external setCacheProvider: (swrConfiguration<'key, 'data>, cache<'data> => cache<'data>) => unit =
     "provider"
+
+  @module("swr") @scope("SWRConfig")
+  external getDefaultValue: swrConfiguration<'key, 'data> = "defaultValue"
 }
 
 module SwrConfiguration = {
   @send
-  @ocaml.doc(`[mutate_key: (config, key)] broadcasts a revalidation message globally to other SWR hooks`)
-  external mutate_key: (swrConfiguration<'key, 'data>, 'key) => Js.Promise.t<Obj.t> = "mutate"
+  @ocaml.doc(`[mutateKey: (config, key)] broadcasts a revalidation message globally to other SWR hooks`)
+  external mutateKey: (
+    swrConfiguration<'key, 'data>,
+    @unwrap [#Key('key) | #Filter('key => bool)],
+  ) => Js.Promise.t<'data> = "mutate"
 
   @send
-  @ocaml.doc(`[mutate_key_data: (config, key, data)] broadcasts a revalidation message globally to other SWR hooks and replacing with latest data`)
-  external mutate_key_data: (swrConfiguration<'key, 'data>, 'key, 'data) => Js.Promise.t<Obj.t> = "mutate"
+  @ocaml.doc(`[mutateKeyWithData: (config, key, data)] broadcasts a revalidation message globally to other SWR hooks and replacing with latest data`)
+  external mutateKeyWithData: (
+    swrConfiguration<'key, 'data>,
+    @unwrap [#Key('key) | #Filter('key => bool)],
+    option<'data> => option<Js.Promise.t<'data>>,
+  ) => Js.Promise.t<'data> = "mutate"
 
   @send
-  @ocaml.doc(`[mutate: (config, key, data, mutatorOptions)] is used to update local data programmatically, while revalidating and finally replacing it with the latest data.`)
-  external mutate: (swrConfiguration<'key, 'data>, 'key, 'data, mutatorOptions<'data>) => Js.Promise.t<Obj.t> =
-    "mutate"
+  @ocaml.doc(`[mutateWithOpts: (config, key, data, mutatorOptions)] is used to update local data programmatically, while revalidating and finally replacing it with the latest data.`)
+  external mutateWithOpts: (
+    swrConfiguration<'key, 'data>,
+    @unwrap [#Key('key) | #Filter('key => bool)],
+    option<'data> => option<'data>,
+    option<mutatorOptions<'data>>,
+  ) => Js.Promise.t<'data> = "mutate"
+
+  @send
+  @ocaml.doc(`[mutateWithOpts_async: (config, key, data, mutatorOptions)] is the same as mutateWithOpts, except the data callback returns a Js.Promise.t`)
+  external mutateWithOpts_async: (
+    swrConfiguration<'key, 'data>,
+    @unwrap [#Key('key) | #Filter('key => bool)],
+    option<'data> => option<Js.Promise.t<'data>>,
+    option<mutatorOptions<'data>>,
+  ) => Js.Promise.t<'data> = "mutate"
 
   @get
-  external cache: swrConfiguration<'key, 'data> => cache<'data> = "cache"
+  external getCache: swrConfiguration<'key, 'data> => cache<'data> = "cache"
 
   @module("swr")
   @ocaml.doc(`[useSWRConfig] returns the global configuration, as well as mutate and cache options.`)
   external useSWRConfig: unit => swrConfiguration<'key, 'data> = "useSWRConfig"
 }
 
-@ocaml.doc(`[setConfigProperty] is used to unsafely set a configuration property.`) @set_index
-external setConfigProperty: (swrConfiguration<'key, 'data>, string, 'val) => unit = ""
+@ocaml.doc(`[unsafeSetProperty] is used to unsafely set a configuration property.`) @set_index @raises(Js.Exn.t)
+external unsafeSetProperty: (swrConfiguration<'key, 'data>, string, 'val) => unit = ""
 
-@ocaml.doc(`[getConfigProperty] is used to unsafely get a configuration property.`) @get_index
-external getConfigProperty: (swrConfiguration<'key, 'data>, string) => 'val = ""
+@ocaml.doc(`[unsafeGetProperty] is used to unsafely retrieve a configuration property.`) @get_index @raises(Js.Exn.t)
+external unsafeGetProperty: (swrConfiguration<'key, 'data>, string) => 'val = ""
+
+@module("swr")
+external preload: (string, fetcher<'arg, 'data>) => 'a = "preload"
+
+@module("swr") @val
+external mutate_key: 'key => unit = "mutate"
+
+@module("swr") @val
+external mutate: ('key, 'data, option<mutatorOptions<'data>>) => unit = "mutate"
 
 @module("swr/immutable")
 external useSWRImmutable: (

@@ -10,42 +10,30 @@ let make = (~url) => {
   let {data, error} = useSWR_config(
     url,
     fetcher,
-    swrConfiguration(~onErrorRetry=(error, key, _config, revalidate, {retryCount}) => {
-      switch error {
-      | FetchError(_info, status) if status == 400 => ()
-      | _ =>
+    {
+      onErrorRetry: (error, key, _config, revalidate, opts) => {
+        Js.log(error)
         switch key {
         | "/api/user" => ()
-        | _ =>
-          switch retryCount {
-          | Some(val) if val >= 10 => ()
-          | _ =>
-            Js.Global.setTimeout(
-              () => revalidate(. {retryCount: retryCount, dedupe: None})->ignore,
-              5000,
-            )->ignore
-          }
+        | _ => Js.Global.setTimeout(() => revalidate(. opts)->ignore, 5000)->ignore
         }
-      }
-    }, ()),
+      },
+    },
   )
   let state = switch (data, error) {
-    | (None, None) => Loading
-    | (Some(data), None) => Resolved(Ok(data))
-    | (None, Some(err)) => Resolved(Error(err))
-    | (_, _) => Idle
+  | (None, None) => Loading
+  | (Some(data), None) => Resolved(Ok(data))
+  | (None, Some(err)) => Resolved(Error(err))
+  | (_, _) => Idle
   }
 
   <div>
-  {switch state {
+    {switch state {
     | Loading => "Loading..."
     | Resolved(Ok(data)) => "Got data: " ++ data
-    | Resolved(Error(error)) => switch (error) {
-      | FetchError(message, _status) => "Error while fetching: " ++ message
-      | Js.Exn.Error(err) => "Error: " ++ Js.Exn.message(err)->Belt.Option.getWithDefault("Unknown exception!")
-      | _ => "Unknown error encountered!"
-    }
+    | Resolved(Error(error)) =>
+      "Error: " ++ Js.Exn.message(error)->Belt.Option.getWithDefault("Unknown exception!")
     | Idle => "Not doing anything!"
-  }->React.string}
+    }->React.string}
   </div>
 }

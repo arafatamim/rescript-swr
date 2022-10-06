@@ -9,6 +9,7 @@ type rec swrMutationConfig<'key, 'data> = {
   populateCache?: (. Obj.t, 'data) => 'data,
   optimisticData?: 'data => 'data,
   rollbackOnError?: bool,
+  throwOnError?: bool,
 }
 
 type swrMutationResponse<'key, 'arg, 'data> = {

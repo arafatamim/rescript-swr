@@ -35,11 +35,11 @@
   },
   "peerDependencies": {
     "@rescript/react": "^0.10.3",
-    "swr": "^2.0.0-beta.6"
+    "swr": "^2.0.0-rc.1"
   },
   "dependencies": {
     "@rescript/react": "0.10.3",
     "react": "^18.2.0",
-    "swr": "2.0.0-beta.6"
+    "swr": "2.0.0-rc.1"
   }
 }

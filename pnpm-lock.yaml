@@ -5,12 +5,12 @@ specifiers:
   react: ^18.2.0
   react-dom: ^18.2.0
   rescript: ^10.0.1
-  swr: 2.0.0-beta.6
+  swr: 2.0.0-rc.1
 
 dependencies:
   '@rescript/react': 0.10.3_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
-  swr: 2.0.0-beta.6_react@18.2.0
+  swr: 2.0.0-rc.1_react@18.2.0
 
 devDependencies:
   react-dom: 18.2.0_react@18.2.0
@@ -63,18 +63,18 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /swr/2.0.0-beta.6_react@18.2.0:
-    resolution: {integrity: sha512-bZkjKiBVaZiqHpuSzWqOafihWpCd3hD/+Ju+gr8FT9++jwdCt+gGIfgC1caY6jXuKrl9kBWTYTbd1qaXPKxMog==}
+  /swr/2.0.0-rc.1_react@18.2.0:
+    resolution: {integrity: sha512-GHKO88VK7aQ8PQMewcQMhNhBnSrrXsg5wxtLpHvsfFHwiil9eMumUhfocf4ew2DaOkVZQm/O5rKi2oeJ5qBX+g==}
     engines: {pnpm: '7'}
     peerDependencies:
       react: ^16.11.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
-      use-sync-external-store: 1.1.0_react@18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
-  /use-sync-external-store/1.1.0_react@18.2.0:
-    resolution: {integrity: sha512-SEnieB2FPKEVne66NpXPd1Np4R1lTNKfjuy3XdIoPQKYBAFdzbzSZlSn1KJZUiihQLQC5Znot4SBz1EOTBwQAQ==}
+  /use-sync-external-store/1.2.0_react@18.2.0:
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:

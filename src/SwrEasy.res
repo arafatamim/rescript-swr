@@ -20,7 +20,7 @@ type keyedMutator<'data> = (
   ~revalidate: bool=?,
   ~populateCache: (Obj.t, 'data) => 'data=?,
   ~optimisticData: 'data => 'data=?,
-  ~rollbackOnError: bool=?,
+  ~rollbackOnError: Obj.t => bool=?,
   unit,
 ) => option<Js.Promise.t<'data>>
 
@@ -44,10 +44,22 @@ let useSWR = (
   | {data: None, error: None, isValidating: _, isLoading: true} => Pending
   | {data: Some(data), error: None, isValidating: true, isLoading: _} => Refresh(Ok(data))
   | {data: _, error: Some(err), isValidating: true, isLoading: _} =>
-    err->Js.Exn.message->Belt.Option.getWithDefault("Unknown JS Error!")->makeError->Error->Refresh
+    switch err->Js.Exn.message {
+    | None => "Unknown JS Error!"
+    | Some(err) => err
+    }
+    ->makeError
+    ->Error
+    ->Refresh
   | {data: Some(data), error: None, isValidating: false, isLoading: false} => Replete(Ok(data))
   | {data: None, error: Some(err), isValidating: false, isLoading: false} =>
-    err->Js.Exn.message->Belt.Option.getWithDefault("Unknown JS Error!")->makeError->Error->Replete
+    switch err->Js.Exn.message {
+    | None => "Unknown JS Error!"
+    | Some(err) => err
+    }
+    ->makeError
+    ->Error
+    ->Replete
   | {data: _, error: _, isValidating: _, isLoading: _} => Invalid
   }
 
@@ -56,7 +68,7 @@ let useSWR = (
     ~revalidate: option<bool>=?,
     ~populateCache: option<(Obj.t, 'data) => 'data>=?,
     ~optimisticData: option<'data => 'data>=?,
-    ~rollbackOnError: option<bool>=?,
+    ~rollbackOnError: option<Obj.t => bool>=?,
     (),
   ) => {
     open SwrCommon
@@ -111,7 +123,13 @@ module SwrConfiguration = {
       },
       switch data {
       | Refresh => Obj.magic
-      | Overwrite(fn) => x => fn(x)->Belt.Option.map(Obj.magic)
+      | Overwrite(fn) =>
+        x => {
+          switch fn(x) {
+          | None => None
+          | Some(x) => Obj.magic(x)
+          }
+        }
       | OverwriteAsync(fn) => fn
       | Clear => _ => None
       },

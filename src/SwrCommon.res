@@ -20,7 +20,7 @@ type mutatorOptions<'data> = {
   revalidate?: bool,
   populateCache?: (Obj.t, 'data) => 'data,
   optimisticData?: 'data => 'data,
-  rollbackOnError?: bool,
+  rollbackOnError?: Obj.t => bool,
 }
 
 type keyedMutator<'data> = (

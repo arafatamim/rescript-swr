@@ -1,7 +1,7 @@
 {
   "name": "rescript-swr",
   "description": "SWR bindings for ReScript",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arafatamim/rescript-swr.git"
@@ -35,11 +35,11 @@
   },
   "peerDependencies": {
     "@rescript/react": "^0.10.3",
-    "swr": "^2.0.0-beta.6"
+    "swr": "^2.0.0"
   },
   "dependencies": {
     "@rescript/react": "0.10.3",
     "react": "^18.2.0",
-    "swr": "2.0.0-beta.6"
+    "swr": "2.0.0"
   }
 }

@@ -1,14 +1,15 @@
 type response = {fact: string}
 
 @val
-external fetch: string => Js.Promise.t<{"json": unit => response}> = "fetch"
+external fetch: string => Js.Promise.t<{"json": (. unit) => Js.Promise.t<response>}> = "fetch"
 
 let sleeper = (ms, x) =>
   Js.Promise.make((~resolve, ~reject as _) => Js.Global.setTimeout(_ => resolve(. x), ms)->ignore)
 
 let fetcher = key => {
   fetch("https://catfact.ninja" ++ key)
-  |> Js.Promise.then_(res => res["json"]() |> Js.Promise.resolve)
+  |> Js.Promise.then_(res => res["json"](.))
+  /* |> Js.Promise.then_(data => Js.Promise.resolve(data.fact)) */
   |> Js.Promise.then_(data => sleeper(5000, data.fact))
 }
 

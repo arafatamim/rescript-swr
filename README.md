@@ -3,17 +3,17 @@
 ![npm](https://img.shields.io/npm/dm/rescript-swr?color=blue)
 
 Low-overhead [ReScript](https://rescript-lang.org) bindings to [SWR](https://github.com/vercel/swr).
-Supports version >=2.0.0 & <=3.0.0. Compatible with ReScript v10 and onwards.
+Supports version >=2.0.0 & <=3.0.0. Compatible with ReScript v11 and onwards.
 
-Includes experimental module `SwrEasy` that's designed for a smoother developer experience,
-with the tradeoff being a slightly higher runtime cost.
+Includes experimental module `SwrEasy` that has a layer of abstraction
+designed for a smoother developer experience, with the tradeoff being a slightly higher runtime cost.
 
 ## Installation
 Run
 ```
 npm install rescript-swr swr
 ```
-then update the `bs-dependencies` key in your `bsconfig.json` file to include "`rescript-swr`".
+then update the `bs-dependencies` key in your `rescript.json` file to include "`rescript-swr`".
 
 ## Examples
 ```rescript
@@ -24,23 +24,23 @@ let make = () => {
     loadingTimeout: 3000,
     fallbackData: {cats: 0, dogs: 0, hamsters: 0},
     onLoadingSlow: (_, _) => {
-      Js.log("This is taking too long")
+      Console.log("This is taking too long")
     },
     onErrorRetry: (_error, _key, _config, revalidate, {?retryCount}) => {
       // Retry after 5 seconds.
-      Js.Global.setTimeout(
-        () => revalidate(. {?retryCount})->ignore,
+      setTimeout(
+        () => revalidate({?retryCount})->ignore,
         5000,
       )->ignore
     },
     use: [
       // logger middleware
-      (useSWRNext, . key, fetcher, config) => {
+      (useSWRNext) => (key, fetcher, config) => {
         let extendedFetcher = args => {
-          Js.log2("SWR Request: ", key)
+          Console.log2("SWR Request: ", key)
           fetcher(args)
         }
-        useSWRNext(. key, extendedFetcher, config)
+        useSWRNext(key, extendedFetcher, config)
       },
     ],
   }

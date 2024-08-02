@@ -11,28 +11,22 @@ external stringifyArray: array<'t> => string = "stringify"
 @val @scope("window")
 external addEventListener: (string, 'event => unit) => unit = "addEventListener"
 
-let wrapDataIntoCacheState = data => {
-  data: Some(data),
-  error: None,
-  isLoading: false,
-  isValidating: false,
-}
-
 let setupCache = map => {
-  open Belt
-
   {
-    get: (. key) => {
-      wrapDataIntoCacheState(
-        map->HashMap.String.get(key)->Option.getWithDefault(""),
-      )->Js.Nullable.return
+    get: key => {
+      map->Map.get(key)->Option.map(data => {data})
     },
-    set: (. key, value) => {
-      map->HashMap.String.set(key, value.data->Option.getWithDefault(""))
+    set: (key, value) => {
+      switch value.data {
+      | Some(data) => map->Map.set(key, {data: data})
+      | _ => ()
+      }
     },
-    delete: (. key) => {
-      map->HashMap.String.remove(key)
-      true
+    delete: key => {
+      map->Map.delete(key)->ignore
+    },
+    keys: () => {
+      map->Map.keys
     },
   }
 }
@@ -44,13 +38,14 @@ let setupCache = map => {
 let localStorageProvider: unit => cache<string> = () => {
   open Dom.Storage2
 
+
   // When initializing, we restore the data from `localStorage` into a map.
-  let cache = localStorage->getItem("app-cache")->Belt.Option.getWithDefault("[]")->parseArray
-  let map = Belt.HashMap.String.fromArray(cache)
+  let cache = localStorage->getItem("app-cache")->Option.getOr("[]")->parseArray
+  let map = Map.fromArray(cache)
 
   // Before unloading the app, we write back all the data into `localStorage`.
   addEventListener("beforeunload", () => {
-    let appCache = stringifyArray(map->Belt.HashMap.String.toArray)
+    let appCache = stringifyArray(map->Map.entries->Array.fromIterator)
     localStorage->setItem("app-cache", appCache)
   })
 
@@ -60,9 +55,13 @@ let localStorageProvider: unit => cache<string> = () => {
 module LocalStorageProvider = {
   @react.component
   let make = () => {
-    let config = {revalidateOnFocus: false}
-    config->SwrConfigProvider.setCacheProvider(_cache => localStorageProvider())
-    <SwrConfigProvider value={config => {...config, suspense: true}}>
+    <SwrConfigProvider
+      value={config => {
+        dedupingInterval: ?config.dedupingInterval->Option.map(v => v * 5),
+        revalidateOnFocus: false,
+        suspense: true,
+        provider: localStorageProvider(),
+      }}>
       <div />
     </SwrConfigProvider>
   }

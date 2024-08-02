@@ -13,15 +13,19 @@
     }
   ],
   "package-specs": {
-    "module": "es6",
+    "module": "esmodule",
     "in-source": true
   },
   "suffix": ".bs.js",
-  "reason": {
-    "react-jsx": 3
+  "jsx": {
+    "version": 4
   },
   "bs-dependencies": [
+    "@rescript/core",
     "@rescript/react"
+  ],
+  "bsc-flags": [
+    "-open RescriptCore",
   ],
   "warnings": {
     "error": "+101"

@@ -1,16 +1,14 @@
 type response = {fact: string}
 
 @val
-external fetch: string => Js.Promise.t<{"json": (. unit) => Js.Promise.t<response>}> = "fetch"
+external fetch: string => promise<{"json": unit => promise<response>}> = "fetch"
 
-let sleeper = (ms, x) =>
-  Js.Promise.make((~resolve, ~reject as _) => Js.Global.setTimeout(_ => resolve(. x), ms)->ignore)
+let sleeper = (ms, x) => Promise.make((resolve, _) => setTimeout(_ => resolve(x), ms)->ignore)
 
 let fetcher = key => {
   fetch("https://catfact.ninja" ++ key)
-  |> Js.Promise.then_(res => res["json"](.))
-  /* |> Js.Promise.then_(data => Js.Promise.resolve(data.fact)) */
-  |> Js.Promise.then_(data => sleeper(5000, data.fact))
+  ->Promise.then(res => res["json"]())
+  ->Promise.thenResolve(res => res.fact)
 }
 
 let renderData = data => ("Cat fact: " ++ data)->React.string
@@ -26,18 +24,15 @@ module App = {
 
     let btns =
       <>
-        <button onClick={_ => mutate(Refresh, ())->ignore}> {"New"->string} </button>
-        <button onClick={_ => mutate(Clear, ~revalidate=false, ())->ignore}>
-          {"Clear"->string}
-        </button>
+        <button onClick={_ => mutate(Refresh)->ignore}> {"New"->string} </button>
+        <button onClick={_ => mutate(Clear, ~revalidate=false)->ignore}> {"Clear"->string} </button>
         <button
           onClick={_ =>
             mutate(
               Overwrite(
-                Belt.Option.map(_, data => data->Js.String2.replaceByRe(%re("/cat/gi"), "🐱")),
+                Option.map(_, data => data->String.replaceAllRegExp(%re("/cat/gi"), "🐱")),
               ),
               ~revalidate=false,
-              (),
             )->ignore}>
           {"🐱-ify"->string}
         </button>
@@ -69,7 +64,7 @@ module App = {
       <>
         <p> {"Cat fact not loaded"->string} </p>
         <p>
-          <button onClick={_ => mutate(Refresh, ())->ignore}> {"Load"->string} </button>
+          <button onClick={_ => mutate(Refresh)->ignore}> {"Load"->string} </button>
         </p>
       </>
     }
@@ -86,6 +81,9 @@ module App = {
 }
 
 switch ReactDOM.querySelector("#root") {
-| Some(root) => ReactDOM.render(<App />, root)
-| None => "Mount root missing!"->Js.Console.error
+| Some(domNode) => {
+    open ReactDOM.Client
+    createRoot(domNode)->Root.render(<App />)
+  }
+| None => "Mount root missing!"->Console.error
 }

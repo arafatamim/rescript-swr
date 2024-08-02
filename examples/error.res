@@ -12,10 +12,10 @@ let make = (~url) => {
     fetcher,
     {
       onErrorRetry: (error, key, _config, revalidate, opts) => {
-        Js.log(error)
+        Console.log(error)
         switch key {
         | "/api/user" => ()
-        | _ => Js.Global.setTimeout(() => revalidate(. opts)->ignore, 5000)->ignore
+        | _ => setTimeout(() => revalidate(opts)->ignore, 5000)->ignore
         }
       },
     },
@@ -32,7 +32,7 @@ let make = (~url) => {
     | Loading => "Loading..."
     | Resolved(Ok(data)) => "Got data: " ++ data
     | Resolved(Error(error)) =>
-      "Error: " ++ Js.Exn.message(error)->Belt.Option.getWithDefault("Unknown exception!")
+      "Error: " ++ Exn.message(error)->Option.getOr("Unknown exception!")
     | Idle => "Not doing anything!"
     }->React.string}
   </div>

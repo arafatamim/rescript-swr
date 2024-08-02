@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 NPM_VERSION=$(jq -r ".version" package.json)
-BS_VERSION=$(jq -r ".version" bsconfig.json)
+BS_VERSION=$(jq -r ".version" rescript.json)
 
 SWR_VERSION=$(jq ".dependencies.swr" package.json)
 
